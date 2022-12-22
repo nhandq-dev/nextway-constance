@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminLoginController!
+{% endblock %}
+
+{% block body %}
+  <style>
+    * {
+      font-family: 'Poppins';
+    }
+    body {
+        user-select: none;
+        overflow-y: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #dde5f4;
+        height: 100vh;
+    }
+    @media screen and (max-width: 600px) {
+      .login-wrapper {
+        min-width: 80vw;
+        min-height: 80vh;
+      }
+    }
+    .login-wrapper {
+        min-width: 300px;
+        background: #f1f7fe;
+        padding: 2em 2em 16em 2em;
+        display: flex;
+        flex-direction: column;
+        border-radius: 30px;
+        box-shadow: 0 0 2em #e6e9f9;
+        gap: 2em;
+    }
+    .login-wrapper .sec-2 {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .login-wrapper .logo {
+      margin-top: -3em;
+      width: 100%;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-wrapper .logo span {
+      font-size: 50px;
+      color: #3e4684;
+    }
+    .login-wrapper .email {
+        background: white;
+        box-shadow: 0 0 2em #e6e9f9;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        border-radius: 20px;
+        color: #4d4d4d;
+        margin-top: -3em;
+    }
+    .login-wrapper .email input {
+        outline: none;
+        border: none;
+        font-size: 18px;
+        margin-left: 8px;
+    }
+    .login-wrapper .email input::placeholder {
+        color: #999999;
+        font-size: 0.9em;
+    }
+    .login-wrapper .email ion-icon {
+        color: #4d4d4d;
+        margin-bottom: -0.2em;
+    }
+    .login-wrapper .password {
+        background: white;
+        box-shadow: 0 0 2em #e6e9f9;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        border-radius: 20px;
+        color: #4d4d4d;
+    }
+    .login-wrapper .password input {
+        outline: none;
+        border: none;
+        font-size: 18px;
+        margin-left: 8px;
+    }
+    .login-wrapper .password input::placeholder {
+        color: #999999;
+        font-size: 0.9em;
+    }
+    .login-wrapper .password ion-icon {
+        color: #4d4d4d;
+        margin-bottom: -0.2em;
+    }
+    .login-wrapper .password .show-hide {
+        margin-right: -5em;
+    }
+    .login-wrapper .login {
+        padding: 1em;
+        background: #3e4684;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: 600;
+    }
+    .login-wrapper .footer {
+        display: flex;
+        font-size: 0.7em;
+        color: #5e5e5e;
+        gap: 14em;
+        padding-bottom: 10em;
+    }
+    .login-wrapper .footer span {
+        cursor: pointer;
+    }
+    button {
+        cursor: pointer;
+    }
+  </style>
+
+  <form action="{{ path('app_admin_login') }}" method="post" id="loginform" action="#">
+    <div class="login-wrapper">
+      <div class="logo"><span>Constance</span></div>
+      <div class="email">
+        <label for="_username">Email Address</label>
+        <div class="sec-2">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#888888" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5l8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+          <input type="email" id="username" placeholder="Username@gmail.com" name="_username" value="{{ last_username }}" autocapitalize="off">
+        </div>
+      </div>
+      <div class="password">
+        <label for="_password">Password</label>
+        <div class="sec-2">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#888888" d="M6 22q-.825 0-1.412-.587Q4 20.825 4 20V10q0-.825.588-1.413Q5.175 8 6 8h1V6q0-2.075 1.463-3.538Q9.925 1 12 1t3.538 1.462Q17 3.925 17 6v2h1q.825 0 1.413.587Q20 9.175 20 10v10q0 .825-.587 1.413Q18.825 22 18 22Zm6-5q.825 0 1.413-.587Q14 15.825 14 15q0-.825-.587-1.413Q12.825 13 12 13q-.825 0-1.412.587Q10 14.175 10 15q0 .825.588 1.413Q11.175 17 12 17ZM9 8h6V6q0-1.25-.875-2.125T12 3q-1.25 0-2.125.875T9 6Z"/></svg>
+          <input type="password" id="password" name="_password" class="pas" placeholder="············">
+        </div>
+      </div>
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+      <button type="submit" class="login">Login</button>
+
+      {% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+      {% endif %}
+    </div>
+  </form>
+{% endblock %}
