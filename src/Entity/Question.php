@@ -32,11 +32,15 @@ class Question extends AbstractEntity
     #[ORM\OneToMany(mappedBy: 'question', targetEntity: QuestionnaireQuestion::class)]
     private Collection $questionnaire;
 
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: UserDailyEmotion::class)]
+    private Collection $userDailyEmotion;
+
     public function __construct()
     {
         parent::__construct();
         $this->questionOptions = new ArrayCollection();
         $this->questionnaire = new ArrayCollection();
+        $this->userDailyEmotion = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -134,6 +138,36 @@ class Question extends AbstractEntity
             // set the owning side to null (unless already changed)
             if ($questionnaire->getQuestion() === $this) {
                 $questionnaire->setQuestion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, userDailyEmotion>
+     */
+    public function getUserDailyEmotion(): Collection
+    {
+        return $this->userDailyEmotion;
+    }
+
+    public function addUserDailyEmotion(UserDailyEmotion $userDailyEmotion): self
+    {
+        if (!$this->userDailyEmotion->contains($userDailyEmotion)) {
+            $this->userDailyEmotion->add($userDailyEmotion);
+            $userDailyEmotion->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserDailyEmotion(UserDailyEmotion $userDailyEmotion): self
+    {
+        if ($this->userDailyEmotion->removeElement($userDailyEmotion)) {
+            // set the owning side to null (unless already changed)
+            if ($userDailyEmotion->getQuestion() === $this) {
+                $userDailyEmotion->setQuestion(null);
             }
         }
 

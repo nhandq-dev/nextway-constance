@@ -2,8 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Community;
-use App\Entity\Team;
+use App\Entity\Social;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -51,8 +50,8 @@ class ConstanceController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home', 'dashboard');
-        yield MenuItem::linkToCrud('Team', 'fas fa-solid fa-users', Team::class);
-        yield MenuItem::linkToCrud('Community', 'fas fa-solid fa-earth-americas', Community::class);
+        yield MenuItem::linkToCrud('Team', 'fas fa-solid fa-users', Social::class)->setController(TeamCrudController::class);
+        yield MenuItem::linkToCrud('Community', 'fas fa-solid fa-earth-americas', Social::class)->setController(CommunityCrudController::class);
         yield MenuItem::linkToCrud('User', 'fas fa-solid fa-user', User::class);
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }

@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: QuestionOptionRepository::class)]
+#[ORM\Table(name: 'tbl_question_option')]
 class QuestionOption extends AbstractEntity
 {
     #[ORM\Id]

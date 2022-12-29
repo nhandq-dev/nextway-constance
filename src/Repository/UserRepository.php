@@ -38,4 +38,9 @@ class UserRepository extends ServiceEntityRepository
       $this->getEntityManager()->flush();
     }
   }
+
+  public function loadUserByIdentifier(string $identifier): ?User
+  {
+    return $this->findOneBy(['phone' => $identifier]);
+  }
 }

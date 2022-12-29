@@ -7,12 +7,16 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserWellnessRepository::class)]
-class UserWellness
+#[ORM\Table(name: 'tbl_user_daily_emotion')]
+class UserDailyEmotion extends AbstractEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\Column(name: 'question_object', type: Types::JSON)]
+    private ?int $questionObject = null;
 
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $rate = null;
@@ -20,14 +24,16 @@ class UserWellness
     #[ORM\Column(type: Types::TEXT)]
     private ?string $reason = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $context_type = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $context_id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'userWellnesses')]
+    #[ORM\ManyToOne(inversedBy: 'userDailyEmotion')]
     private ?User $person = null;
+
+    #[ORM\ManyToOne(inversedBy: 'userDailyEmotion')]
+    private ?Question $question = null;
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
     public function getId(): ?int
     {
@@ -42,6 +48,18 @@ class UserWellness
     public function setRate(int $rate): self
     {
         $this->rate = $rate;
+
+        return $this;
+    }
+
+    public function getQuestionObject(): ?object
+    {
+        return $this->questionObject;
+    }
+
+    public function setQuestionObject(?object $question): self
+    {
+        return $this->questionObject = $question;
 
         return $this;
     }
@@ -90,6 +108,18 @@ class UserWellness
     public function setPerson(?User $person): self
     {
         $this->person = $person;
+
+        return $this;
+    }
+
+    public function getQuestion(): ?Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?Question $question): self
+    {
+        $this->question = $question;
 
         return $this;
     }

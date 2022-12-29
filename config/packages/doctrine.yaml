@@ -27,6 +27,7 @@ doctrine:
                 JSON_GET_PATH: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Postgresql\JsonGetPath
                 JSON_GET_PATH_TEXT: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Postgresql\JsonGetPathText
                 JSON_GET_TEXT: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Postgresql\JsonGetText
+                COUNT_OVER: App\Doctrine\Functions\CountOverSql
 
 when@test:
     doctrine:

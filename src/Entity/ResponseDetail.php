@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ResponseDetailRepository::class)]
+#[ORM\Table(name: 'tbl_response_detail')]
 class ResponseDetail extends AbstractEntity
 {
     #[ORM\Id]

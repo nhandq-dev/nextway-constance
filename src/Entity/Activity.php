@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ActivityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -25,9 +27,9 @@ class Activity extends AbstractEntity
     #[Assert\NotBlank]
     private ?string $description = null;
 
-    #[ORM\Column(name: 'activity_date', type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(name: 'due_date', type: Types::DATETIME_MUTABLE)]
     #[Assert\NotBlank]
-    private ?\DateTimeInterface $activityDate = null;
+    private ?\DateTimeInterface $dueDate = null;
 
     #[ORM\Column(name: 'is_repeat', type: Types::BOOLEAN, nullable: true)]
     #[Assert\NotBlank]
@@ -42,8 +44,7 @@ class Activity extends AbstractEntity
     private ?string $repeatUnit = null;
 
     #[ORM\ManyToOne(inversedBy: 'activities')]
-    #[ORM\JoinColumn(name: "owner_id", referencedColumnName: "id")]
-    private ?User $owner = null;
+    private ?User $person = null;
 
     #[ORM\OneToOne(mappedBy: 'onTask', cascade: ['persist', 'remove'])]
     private ?QuestionnaireResponse $response = null;
@@ -51,9 +52,13 @@ class Activity extends AbstractEntity
     #[ORM\Column(name: 'status', type: Types::INTEGER)]
     private ?int $status = null;
 
+    #[ORM\OneToMany(mappedBy: 'activity', targetEntity: ActivityResponse::class)]
+    private Collection $activityResponses;
+
     public function __construct()
     {
         parent::__construct();
+        $this->activityResponses = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -90,14 +95,14 @@ class Activity extends AbstractEntity
         return $this;
     }
 
-    public function getActivityDate(): ?\DateTimeInterface
+    public function getDueDate(): ?\DateTimeInterface
     {
-        return $this->activityDate;
+        return $this->dueDate;
     }
 
-    public function setActivityDate(\DateTimeInterface $activityDate): self
+    public function setDueDate(\DateTimeInterface $dueDate): self
     {
-        $this->activityDate = $activityDate;
+        $this->dueDate = $dueDate;
 
         return $this;
     }
@@ -138,14 +143,14 @@ class Activity extends AbstractEntity
         return $this;
     }
 
-    public function getOwner(): ?User
+    public function getPerson(): ?User
     {
-        return $this->owner;
+        return $this->person;
     }
 
-    public function setOwner(?User $owner): self
+    public function setPerson(?User $person): self
     {
-        $this->owner = $owner;
+        $this->person = $person;
 
         return $this;
     }
@@ -180,6 +185,36 @@ class Activity extends AbstractEntity
         }
 
         $this->response = $response;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ActivityResponse>
+     */
+    public function getActivityResponses(): Collection
+    {
+        return $this->activityResponses;
+    }
+
+    public function addActivityResponse(ActivityResponse $activityResponse): self
+    {
+        if (!$this->activityResponses->contains($activityResponse)) {
+            $this->activityResponses->add($activityResponse);
+            $activityResponse->setActivity($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivityResponse(ActivityResponse $activityResponse): self
+    {
+        if ($this->activityResponses->removeElement($activityResponse)) {
+            // set the owning side to null (unless already changed)
+            if ($activityResponse->getActivity() === $this) {
+                $activityResponse->setActivity(null);
+            }
+        }
 
         return $this;
     }

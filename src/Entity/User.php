@@ -12,6 +12,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Utils\SocialUtil;
 use App\Utils\UserUtil;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -69,30 +70,36 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
   #[ORM\Column(type: Types::JSON)]
   private array $roles = [];
 
-  #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Activity::class)]
+  #[ORM\OneToMany(mappedBy: 'person', targetEntity: Activity::class)]
   private Collection $activities;
 
-  #[ORM\ManyToOne(inversedBy: 'users')]
-  private ?Team $team = null;
-
-  #[ORM\ManyToOne(inversedBy: 'users')]
-  private ?Community $community = null;
+  private $team = null;
+  private $community = null;
+  private ?Collection $socialCollection = null;
 
   #[ORM\OneToOne(mappedBy: 'responsedUser', cascade: ['persist', 'remove'])]
   private ?QuestionnaireResponse $quuestionnaireResponse = null;
 
-  #[ORM\OneToMany(mappedBy: 'person', targetEntity: UserWellness::class)]
-  private Collection $userWellnesses;
+  #[ORM\OneToMany(mappedBy: 'person', targetEntity: UserDailyEmotion::class)]
+  private ?Collection $userDailyEmotion;
 
   #[ORM\Column(type: Types::BINARY, nullable: true)]
-  private string $avatar;
+  private ?string $avatar = null;
+
+  #[ORM\Column(type: Types::SMALLINT, nullable: false)]
+  private int $status = UserUtil::ACTIVE;
+
+  #[ORM\OneToMany(mappedBy: 'person', targetEntity: UserSocial::class, cascade: ['persist', 'remove'])]
+  private Collection $userSocials;
 
   public function __construct()
   {
     parent::__construct();
     $this->activities = new ArrayCollection();
-    $this->userWellnesses = new ArrayCollection();
+    $this->userDailyEmotion = new ArrayCollection();
     $this->roles = [UserUtil::ROLE_USER];
+    $this->userSocials = new ArrayCollection();
+    $this->socialCollection = new ArrayCollection();
   }
 
   public function __toString(): string
@@ -117,7 +124,7 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
 
   public function getUserIdentifier(): string
   {
-    return (string) $this->firstName . ' ' . $this->lastName;
+    return (string) $this->phone;
   }
 
   public function setLastName(string $lastName): void
@@ -248,7 +255,7 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
   {
     if (!$this->activities->contains($activity)) {
       $this->activities->add($activity);
-      $activity->setOwner($this);
+      $activity->setPerson($this);
     }
 
     return $this;
@@ -258,34 +265,22 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
   {
     if ($this->activities->removeElement($activity)) {
       // set the owning side to null (unless already changed)
-      if ($activity->getOwner() === $this) {
-        $activity->setOwner(null);
+      if ($activity->getPerson() === $this) {
+        $activity->setPerson(null);
       }
     }
 
     return $this;
   }
 
-  public function getCommunity(): ?Community
+  public function getStatus(): ?int
   {
-    return $this->community;
+    return $this->status;
   }
 
-  public function setCommunity(?Community $community): self
+  public function setStatus(?int $status): self
   {
-    $this->community = $community;
-
-    return $this;
-  }
-
-  public function getTeam(): ?Team
-  {
-    return $this->team;
-  }
-
-  public function setTeam(?Team $team): self
-  {
-    $this->team = $team;
+    $this->status = $status;
 
     return $this;
   }
@@ -313,32 +308,116 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
   }
 
   /**
-   * @return Collection<int, UserWellness>
+   * @return Collection<int, UserDailyEmotion>
    */
-  public function getUserWellnesses(): Collection
+  public function getUserDailyEmotiones(): Collection
   {
-    return $this->userWellnesses;
+    return $this->userDailyEmotion;
   }
 
-  public function addUserWellness(UserWellness $userWellness): self
+  public function addUserDailyEmotion(UserDailyEmotion $userWellness): self
   {
-    if (!$this->userWellnesses->contains($userWellness)) {
-      $this->userWellnesses->add($userWellness);
+    if (!$this->userDailyEmotion->contains($userWellness)) {
+      $this->userDailyEmotion->add($userWellness);
       $userWellness->setPerson($this);
     }
 
     return $this;
   }
 
-  public function removeUserWellness(UserWellness $userWellness): self
+  public function removeUserDailyEmotion(UserDailyEmotion $userWellness): self
   {
-    if ($this->userWellnesses->removeElement($userWellness)) {
+    if ($this->userDailyEmotion->removeElement($userWellness)) {
       // set the owning side to null (unless already changed)
       if ($userWellness->getPerson() === $this) {
         $userWellness->setPerson(null);
       }
     }
 
+    return $this;
+  }
+
+  /**
+   * @return Collection<int, UserSocial>
+   */
+  public function getUserSocials(): Collection
+  {
+    return $this->userSocials;
+  }
+
+  public function addUserSocial(UserSocial $userSocial): self
+  {
+    if (!$this->userSocials->contains($userSocial)) {
+      $this->userSocials->add($userSocial);
+      $userSocial->setPerson($this);
+    }
+
+    return $this;
+  }
+
+  public function removeUserSocial(UserSocial $userSocial): self
+  {
+    if ($this->userSocials->removeElement($userSocial)) {
+      // set the owning side to null (unless already changed)
+      if ($userSocial->getPerson() === $this) {
+        $userSocial->setPerson(null);
+      }
+    }
+
+    return $this;
+  }
+
+  public function emptyUserSocial(): self
+  {
+    foreach ($this->userSocials as $userSocial) {
+      if ($this->userSocials->removeElement($userSocial)) {
+        // set the owning side to null (unless already changed)
+        if ($userSocial->getPerson() === $this) {
+          $userSocial->setPerson(null);
+        }
+      }
+    }
+
+    return $this;
+  }
+
+  public function getCommunity(): ?string
+  {
+    if ($this->community) {
+      return $this->community;
+    }
+    $community = $this->userSocials->filter(
+      function (UserSocial $entry) {
+        return $entry->getSocial()->getType() === SocialUtil::TYPE_COMMUNITY;
+      }
+    )->first();
+
+    return $community ? $community->getSocial()->getId() : null;
+  }
+
+  public function setCommunity(?int $communityId): self
+  {
+    $this->community = $communityId;
+    return $this;
+  }
+
+  public function getTeam(): ?string
+  {
+    if ($this->team) {
+      return $this->team;
+    }
+    $team = $this->userSocials->filter(
+      function (UserSocial $entry) {
+        return $entry->getSocial()->getType() === SocialUtil::TYPE_TEAM;
+      }
+    )->first();
+
+    return $team ? $team->getSocial()->getId() : null;
+  }
+
+  public function setTeam(?int $teamId): self
+  {
+    $this->team = $teamId;
     return $this;
   }
 }

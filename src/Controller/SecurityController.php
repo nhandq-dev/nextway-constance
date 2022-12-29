@@ -11,8 +11,11 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 
 /**
  * Controller used to manage the application security.
@@ -33,5 +36,18 @@ class SecurityController extends AbstractController
   public function logout(): void
   {
     throw new \Exception('This should never be reached!');
+  }
+
+  #[Route('/login', name: 'login')]
+  public function requestLoginLink(LoginLinkHandlerInterface $loginLinkHandler, UserRepository $userRepository, Request $request)
+  {
+    // load the user in some way (e.g. using the form input)
+    $email = $request->request->get('email');
+    $user = $userRepository->findOneBy(['email' => $email]);
+    dump($request) . die;
+
+    return $this->json([
+      'user'  => $user->getUserIdentifier(),
+    ]);
   }
 }
